@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const basicAuth = require('express-basic-auth');
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Vercel'de PORT ortam değişkeni kullanılır
 
 // Kullanıcı adı ve şifreleri ayarlama
 const users = {
@@ -19,21 +19,21 @@ app.use('/admin', basicAuth({
 }));
 
 // Middleware
-app.use(express.static('public'));
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(fileUpload());
 
 // Şablon motorunu ayarlama
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(process.cwd(), 'views'));
 
 // Anasayfa
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
 // Admin sayfası
 app.get('/admin', (req, res) => {
-  const uploadDir = path.join(__dirname, 'public', 'uploads');
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
   fs.readdir(uploadDir, (err, files) => {
     if (err) {
       return res.status(500).send('Dosyalar alınamadı.');
@@ -64,7 +64,7 @@ app.post('/upload', (req, res) => {
   if (fileName.endsWith('.txt.txt')) {
     fileName = fileName.replace('.txt.txt', '.txt');
   }
-  let uploadPath = path.join(__dirname, 'public', 'uploads', fileName);
+  let uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
 
   uploadedFile.mv(uploadPath, (err) => {
     if (err) {
@@ -77,7 +77,7 @@ app.post('/upload', (req, res) => {
 
 // Dosya içeriğini gösterme
 app.get('/view/:fileName', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'uploads', req.params.fileName);
+  const filePath = path.join(process.cwd(), 'public', 'uploads', req.params.fileName);
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
@@ -93,7 +93,7 @@ app.get('/view/:fileName', (req, res) => {
 
 // Dosya sunma
 app.get('/uploads/:fileName', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'uploads', req.params.fileName);
+  const filePath = path.join(process.cwd(), 'public', 'uploads', req.params.fileName);
   res.sendFile(filePath);
 });
 
