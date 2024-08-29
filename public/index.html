@@ -4,8 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-</head>
-<body>
-    <h1>Deneme</h1>
+    <link rel="stylesheet" href="styles.css">
+   </head>
+   <style>
+    /* Tüm sayfada yatay kaydırma çubuğunu gizler */
+        body {
+        overflow-y: hidden;
+        }
+
+   </style>
+<body class="bg-slate-300 relative">
+    <div class="navbar bg-base-100">
+        <div class="flex-1">
+          <a class="btn btn-ghost text-xl">nefrius-api</a>
+        </div>
+        <div class="flex-none">
+          <ul class="menu menu-horizontal px-1">
+            <li><a href="/admin">Admin</a></li>
+          </ul>
+        </div>
+    </div>
+
+    <div class="hero bg-base-200 min-h-screen">
+  <div class="hero-content text-center">
+    <div class="max-w-md">
+      <h1 class="text-5xl font-bold">Nefrius-Api</h1>
+      <p class="py-6">
+        Bu sayfa kendi txt,mp4,mov dosyalarımı depoladığım yerdir.
+      </p>
+      <button class="btn btn-primary"><a href="/admin">Admin Sayfası</a></button>
+    </div>
+  </div>
+</div>
+
 </body>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
 </html>
