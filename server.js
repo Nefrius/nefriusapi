@@ -40,10 +40,17 @@ app.get('/admin', (req, res) => {
     }
 
     // Dosyaların tamamını göstermek için
-    const fileNames = files.map(file => ({
-      name: file,
-      path: `/uploads/${file}`
-    }));
+    const fileNames = files.map(file => {
+      // Dosya adındaki iki kez uzantıyı düzelt
+      let displayName = file;
+      if (file.endsWith('.txt.txt')) {
+        displayName = file.replace('.txt.txt', '.txt');
+      }
+      return {
+        name: displayName,
+        path: `/uploads/${file}`
+      };
+    });
 
     res.render('admin', { files: fileNames });
   });
@@ -52,7 +59,12 @@ app.get('/admin', (req, res) => {
 // Dosya yükleme
 app.post('/upload', (req, res) => {
   let uploadedFile = req.files.file;
-  let uploadPath = path.join(__dirname, 'public', 'uploads', uploadedFile.name);
+  // Dosya adını kontrol et ve uzantıyı düzelt
+  let fileName = uploadedFile.name;
+  if (fileName.endsWith('.txt.txt')) {
+    fileName = fileName.replace('.txt.txt', '.txt');
+  }
+  let uploadPath = path.join(__dirname, 'public', 'uploads', fileName);
 
   uploadedFile.mv(uploadPath, (err) => {
     if (err) {
