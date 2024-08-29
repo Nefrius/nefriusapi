@@ -2,8 +2,21 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const path = require('path');
+const basicAuth = require('express-basic-auth');
 const app = express();
 const PORT = 3000;
+
+// Kullanıcı adı ve şifreleri ayarlama
+const users = {
+  'nefrius': 'nefrius' // Burada admin olarak kullanıcı adı ve password olarak şifre belirleyin
+};
+
+// HTTP Basic Authentication middleware'i
+app.use('/admin', basicAuth({
+  users: users,
+  challenge: true,
+  unauthorizedResponse: 'Yetkisiz Erişim'
+}));
 
 // Middleware
 app.use(express.static('public'));
@@ -28,8 +41,8 @@ app.get('/admin', (req, res) => {
 
     // Dosyaların tamamını göstermek için
     const fileNames = files.map(file => ({
-      name: file, // Dosya adını olduğu gibi al
-      path: `/uploads/${file}` // Dosya yolunu ayarla
+      name: file,
+      path: `/uploads/${file}`
     }));
 
     res.render('admin', { files: fileNames });

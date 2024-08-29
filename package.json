@@ -32,6 +32,7 @@
     "escape-html": "^1.0.3",
     "etag": "^1.8.1",
     "express": "^4.19.2",
+    "express-basic-auth": "^1.2.1",
     "express-fileupload": "^1.5.1",
     "filelist": "^1.0.4",
     "finalhandler": "^1.2.0",
