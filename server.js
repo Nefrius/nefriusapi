@@ -75,6 +75,22 @@ app.post('/upload', (req, res) => {
   });
 });
 
+// Dosya içeriğini gösterme
+app.get('/view/:fileName', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'uploads', req.params.fileName);
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('Dosya okunamadı.');
+    }
+
+    res.render('view', {
+      fileName: req.params.fileName,
+      fileContent: data
+    });
+  });
+});
+
 // Dosya sunma
 app.get('/uploads/:fileName', (req, res) => {
   const filePath = path.join(__dirname, 'public', 'uploads', req.params.fileName);
