@@ -24,8 +24,11 @@
     <ul class="list-group">
       <% if (files.length > 0) { %>
         <% files.forEach(function(file) { %>
-          <li class="list-group-item">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
             <a href="/uploads/<%= file.name %>" target="_blank"><%= file.name %></a>
+            <form action="/admin/delete/<%= file.name %>" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-sm">Sil</button>
+            </form>
           </li>
         <% }); %>
       <% } else { %>

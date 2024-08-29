@@ -34,44 +34,74 @@ app.get('/', (req, res) => {
 // Admin sayfası
 app.get('/admin', (req, res) => {
   const uploadDir = path.join(__dirname, 'public', 'uploads');
-  fs.readdir(uploadDir, (err, files) => {
+
+  // Dizin var mı kontrol et ve oluştur
+  fs.mkdir(uploadDir, { recursive: true }, (err) => {
     if (err) {
-      return res.status(500).send('Dosyalar alınamadı.');
+      console.error('Upload dizini oluşturulamadı:', err);
+      return res.status(500).send('Upload dizini oluşturulamadı.');
     }
 
-    // Dosyaların tamamını göstermek için
-    const fileNames = files.map(file => {
-      // Dosya adındaki iki kez uzantıyı düzelt
-      let displayName = file;
-      if (file.endsWith('.txt.txt')) {
-        displayName = file.replace('.txt.txt', '.txt');
+    fs.readdir(uploadDir, (err, files) => {
+      if (err) {
+        console.error('Dosyalar alınamadı:', err);
+        return res.status(500).send('Dosyalar alınamadı.');
       }
-      return {
-        name: displayName,
-        path: `/uploads/${file}`
-      };
-    });
 
-    res.render('admin', { files: fileNames });
+      const fileNames = files.map(file => {
+        let displayName = file;
+        if (file.endsWith('.txt.txt')) {
+          displayName = file.replace('.txt.txt', '.txt');
+        }
+        return {
+          name: displayName,
+          path: `/uploads/${file}`
+        };
+      });
+
+      res.render('admin', { files: fileNames });
+    });
   });
 });
 
 // Dosya yükleme
 app.post('/upload', (req, res) => {
+  if (!req.files || !req.files.file) {
+    return res.status(400).send('Hiçbir dosya seçilmedi.');
+  }
+
   let uploadedFile = req.files.file;
-  // Dosya adını kontrol et ve uzantıyı düzelt
   let fileName = uploadedFile.name;
   if (fileName.endsWith('.txt.txt')) {
     fileName = fileName.replace('.txt.txt', '.txt');
   }
   let uploadPath = path.join(__dirname, 'public', 'uploads', fileName);
 
-  uploadedFile.mv(uploadPath, (err) => {
+  // Yükleme dizinini kontrol et ve oluştur
+  fs.mkdir(path.dirname(uploadPath), { recursive: true }, (err) => {
     if (err) {
-      return res.status(500).send(err);
+      console.error('Dizin oluşturulamadı:', err);
+      return res.status(500).send('Dizin oluşturulamadı.');
     }
 
-    res.redirect('/admin');
+    // Dosyayı geçici dizine yükle
+    uploadedFile.mv(uploadPath, (err) => {
+      if (err) {
+        console.error('Dosya yükleme hatası:', err);
+        return res.status(500).send(err);
+      }
+
+      // Dosyayı public/uploads dizinine kopyala
+      const tempFilePath = path.join('/tmp', 'uploads', fileName);
+      fs.copyFile(uploadPath, tempFilePath, (err) => {
+        if (err) {
+          console.error('Dosya kopyalama hatası:', err);
+          return res.status(500).send('Dosya kopyalama hatası.');
+        }
+
+        res.redirect('/admin');
+      });
+    });
   });
 });
 
@@ -81,6 +111,7 @@ app.get('/view/:fileName', (req, res) => {
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
+      console.error('Dosya okunamadı:', err);
       return res.status(500).send('Dosya okunamadı.');
     }
 
@@ -94,7 +125,24 @@ app.get('/view/:fileName', (req, res) => {
 // Dosya sunma
 app.get('/uploads/:fileName', (req, res) => {
   const filePath = path.join(__dirname, 'public', 'uploads', req.params.fileName);
-  res.sendFile(filePath);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Dosya sunma hatası:', err);
+      res.status(err.status).end();
+    }
+  });
+});
+
+app.post('/admin/delete/:fileName', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'uploads', req.params.fileName);
+
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      return res.status(500).send('Dosya silinemedi.');
+    }
+
+    res.redirect('/admin');
+  });
 });
 
 app.listen(PORT, () => {
